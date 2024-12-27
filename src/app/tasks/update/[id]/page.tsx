@@ -4,17 +4,20 @@ import { redirect } from "next/navigation";
 import { Task } from "@/types/task";
 
 export default async function UpdateTaskPage({ params }: { params: { id: string } }) {
-  const tasks = await fetchTasks();
-  const task = tasks.find((t: Task) => t.id === params.id);
+  const [tasks, { id }] = await Promise.all([
+    fetchTasks(),
+    Promise.resolve(params)
+  ]);
+  
+  const task = tasks.find((t: Task) => t.id === id);
 
   if (!task) {
     redirect("/");
   }
 
-  // Server Actionをラップする関数を作成
   async function handleUpdate(formData: FormData) {
     "use server";
-    await updateTaskAction(params.id, formData);
+    await updateTaskAction(id, formData);
   }
 
   return (
